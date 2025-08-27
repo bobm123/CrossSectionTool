@@ -1,0 +1,20 @@
+# Fusion 360 temporary files
+*.log
+*.tmp
+__pycache__/
+*.pyc
+*.pyo
+
+# Development environment
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Distribution builds
+dist/
+build/
+*.zip
+
+# Extras stuff generated along the way...
+Kruft/
