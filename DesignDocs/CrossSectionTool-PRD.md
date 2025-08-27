@@ -151,23 +151,17 @@ This manual approach is tedious, error-prone, and becomes increasingly complex a
 
 ### Repository Structure
 ```
-cross-section-generator/
-├── src/
-│   └── CrossSectionGenerator.py          # Main script file (single file for scripts)
-├── resources/                            # Optional for scripts
-│   └── icons/
-│       ├── command_16.png               # 16x16 icon (optional)
-│       └── command_32.png               # 32x32 icon (optional)
-├── docs/
-│   ├── README.md                        # Installation and usage guide
-│   ├── examples/                        # Example projects
-│   └── screenshots/                     # UI screenshots
-├── tests/
-│   ├── test_geometry.py                 # Unit tests for geometry functions
-│   └── test_validation.py               # Input validation tests
-└── .gitignore                           # Git ignore for Fusion 360 temp files
+CrossSectionTool/
+├── CrossSectionTool/
+│   ├── CrossSectionTool.py              # Main script file
+│   ├── CrossSectionTool.manifest        # Script metadata and configuration
+│   └── ScriptIcon.svg                   # Script icon
+├── DesignDocs/
+│   └── CrossSectionTool-PRD.md          # Product requirements document
+├── CLAUDE.md                            # Claude Code guidance file
+└── .git/                                # Git repository
 
-Note: Scripts do NOT require manifest.yaml files (only Add-ins do)
+Note: Scripts require manifest files for metadata and configuration
 ```
 
 ### Local Development Setup

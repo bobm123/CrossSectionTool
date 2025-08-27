@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Section Generator - Fusion 360 Plugin</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .dialog {
+            width: 280px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 11px;
+        }
+        
+        .dialog-header {
+            background: #f0f0f0;
+            color: #333;
+            padding: 6px 8px;
+            font-weight: normal;
+            font-size: 11px;
+            border-radius: 4px 4px 0 0;
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .dialog-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .pattern-icon {
+            width: 16px;
+            height: 16px;
+            background: #0078d4;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .expand-arrow {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .dialog-content {
+            padding: 8px;
+        }
+        
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            min-height: 24px;
+        }
+        
+        .form-label {
+            width: 80px;
+            color: #333;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+        
+        .form-control {
+            flex: 1;
+            margin-left: 8px;
+        }
+        
+        .selection-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .selection-button {
+            background: #f8f8f8;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+            font-size: 10px;
+        }
+        
+        .selection-button:hover {
+            background: #e8e8e8;
+        }
+        
+        .selection-button.has-selection {
+            background: #e3f2fd;
+            border-color: #90caf9;
+            color: #1976d2;
+        }
+        
+        .clear-button {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .clear-button:hover {
+            color: #333;
+        }
+        
+        .dropdown {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            padding: 2px 4px;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 18px;
+        }
+        
+        .dropdown:hover {
+            border-color: #0078d4;
+        }
+        
+        .dropdown-arrow {
+            font-size: 8px;
+            color: #666;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .checkbox {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .number-input {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            padding: 2px 4px;
+            font-size: 11px;
+            text-align: right;
+            width: 60px;
+        }
+        
+        .number-input:focus {
+            border-color: #0078d4;
+            outline: none;
+        }
+        
+        .number-spinner {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .spinner-buttons {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .spinner-button {
+            background: #f8f8f8;
+            border: none;
+            padding: 1px 4px;
+            font-size: 8px;
+            cursor: pointer;
+            height: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .spinner-button:hover {
+            background: #e8e8e8;
+        }
+        
+        .spinner-button:first-child {
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            background: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
+            border-radius: 0 0 4px 4px;
+        }
+        
+        .info-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .info-icon:hover {
+            background: #e0e0e0;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .button {
+            padding: 4px 12px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            background: white;
+            cursor: pointer;
+            font-size: 11px;
+            min-width: 50px;
+        }
+        
+        .button:hover {
+            background: #f0f0f0;
+        }
+        
+        .button-primary {
+            background: #0078d4;
+            color: white;
+            border-color: #0078d4;
+        }
+        
+        .button-primary:hover {
+            background: #106ebe;
+        }
+        
+        .button:disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="dialog">
+        <div class="dialog-header">
+            <div class="dialog-title">
+                <div class="pattern-icon">⊞</div>
+                <span>CROSS-SECTION GENERATOR</span>
+            </div>
+            <div class="expand-arrow">▶</div>
+        </div>
+        
+        <div class="dialog-content">
+            <!-- Bodies Selection -->
+            <div class="form-row">
+                <div class="form-label">Bodies</div>
+                <div class="form-control">
+                    <div class="selection-container">
+                        <div class="selection-button has-selection" id="bodiesButton">
+                            📦 2 selected
+                        </div>
+                        <button class="clear-button" id="clearBodies">×</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Axis Selection -->
+            <div class="form-row">
+                <div class="form-label">Axis</div>
+                <div class="form-control">
+                    <div class="selection-container">
+                        <div class="selection-button has-selection" id="axisButton">
+                            📍 1 selected
+                        </div>
+                        <button class="clear-button" id="clearAxis">×</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Distribution Method -->
+            <div class="form-row">
+                <div class="form-label">Distribution</div>
+                <div class="form-control">
+                    <div class="dropdown" id="distributionDropdown">
+                        <span>Count</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Suppression Option -->
+            <div class="form-row">
+                <div class="form-label">Suppression</div>
+                <div class="form-control">
+                    <div class="checkbox-container">
+                        <input type="checkbox" class="checkbox" id="suppression">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quantity -->
+            <div class="form-row">
+                <div class="form-label">Quantity</div>
+                <div class="form-control">
+                    <div class="number-spinner">
+                        <input type="number" class="number-input" value="6" id="quantityInput">
+                        <div class="spinner-buttons">
+                            <button class="spinner-button" onclick="incrementQuantity()">▲</button>
+                            <button class="spinner-button" onclick="decrementQuantity()">▼</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dialog-buttons">
+            <div class="info-icon" onclick="showInfo()" title="Plugin Information">i</div>
+            <div class="button-group">
+                <button class="button button-primary" id="okBtn">OK</button>
+                <button class="button" onclick="closeDialog()">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Mock interactivity for the UI
+        let distributionMode = 'Count';
+        let quantity = 6;
+        
+        // Distribution dropdown toggle
+        document.getElementById('distributionDropdown').addEventListener('click', function() {
+            distributionMode = distributionMode === 'Count' ? 'Distance' : 'Count';
+            this.querySelector('span').textContent = distributionMode;
+            
+            const quantityLabel = document.querySelector('.form-label');
+            const quantityInput = document.getElementById('quantityInput');
+            
+            if (distributionMode === 'Count') {
+                quantityInput.value = "6";
+            } else {
+                quantityInput.value = "5.0";
+            }
+        });
+        
+        // Bodies selection
+        document.getElementById('bodiesButton').addEventListener('click', function() {
+            alert('Body selection dialog would open');
+        });
+        
+        document.getElementById('clearBodies').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const button = document.getElementById('bodiesButton');
+            button.textContent = '📦 0 selected';
+            button.classList.remove('has-selection');
+        });
+        
+        // Axis selection
+        document.getElementById('axisButton').addEventListener('click', function() {
+            alert('Axis selection dialog would open');
+        });
+        
+        document.getElementById('clearAxis').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const button = document.getElementById('axisButton');
+            button.textContent = '📍 0 selected';
+            button.classList.remove('has-selection');
+        });
+        
+        // Quantity spinners
+        function incrementQuantity() {
+            const input = document.getElementById('quantityInput');
+            const currentValue = parseFloat(input.value);
+            if (distributionMode === 'Count') {
+                input.value = Math.min(100, currentValue + 1);
+            } else {
+                input.value = (currentValue + 0.1).toFixed(1);
+            }
+        }
+        
+        function decrementQuantity() {
+            const input = document.getElementById('quantityInput');
+            const currentValue = parseFloat(input.value);
+            if (distributionMode === 'Count') {
+                input.value = Math.max(1, currentValue - 1);
+            } else {
+                input.value = Math.max(0.1, currentValue - 0.1).toFixed(1);
+            }
+        }
+        
+        function showInfo() {
+            alert('Cross-Section Generator Plugin v1.0\\n\\nGenerates parametric cross-section sketches along selected axes for multiple bodies.\\n\\nAuthor: Your Name\\nVersion: 1.0');
+        }
+        
+        function closeDialog() {
+            alert('Dialog would close');
+        }
+        
+        document.getElementById('okBtn').addEventListener('click', function() {
+            alert('Cross-sections would be generated!');
+        });
+    </script>
+</body>
+</html>
