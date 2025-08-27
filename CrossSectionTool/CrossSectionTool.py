@@ -124,7 +124,7 @@ class CrossSectionCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
             bodiesInput.setSelectionLimits(1, 0)  # At least 1, no upper limit
             
             # Axis selection input  
-            axisInput = inputs.addSelectionInput('axis', 'Axis', 'Select construction axis')
+            axisInput = inputs.addSelectionInput('axis', 'Axis', 'Select axis')
             #axisInput.addSelectionFilter('ConstructionAxes')
             axisInput.setSelectionLimits(1, 1)  # Exactly 1
             
