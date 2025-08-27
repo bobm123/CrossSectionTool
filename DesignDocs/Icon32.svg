@@ -1,0 +1,21 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- 3D object (cylinder/rounded shape) -->
+  <ellipse cx="16" cy="8" rx="10" ry="4" fill="#4A90E2" stroke="#2C5F8F" stroke-width="1"/>
+  <rect x="6" y="8" width="20" height="12" fill="#5BA0F2"/>
+  <ellipse cx="16" cy="20" rx="10" ry="4" fill="#6BB0FF" stroke="#2C5F8F" stroke-width="1"/>
+  
+  <!-- Cutting plane with more detail -->
+  <rect x="2" y="14" width="28" height="2" fill="#FF6B35" opacity="0.8"/>
+  <rect x="1" y="13" width="30" height="4" fill="none" stroke="#FF4500" stroke-width="1" stroke-dasharray="2,2"/>
+  
+  <!-- Cross section lines -->
+  <line x1="6" y1="15" x2="26" y2="15" stroke="#FF4500" stroke-width="1.5"/>
+  
+  <!-- Cross section indicator with "X" -->
+  <circle cx="27" cy="5" r="3" fill="#FF6B35" stroke="#FFFFFF" stroke-width="1"/>
+  <text x="27" y="8" text-anchor="middle" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white">✕</text>
+  
+  <!-- Small cutting plane indicators -->
+  <polygon points="2,13 6,11 6,17" fill="#FF4500" opacity="0.7"/>
+  <polygon points="30,13 26,11 26,17" fill="#FF4500" opacity="0.7"/>
+</svg>
