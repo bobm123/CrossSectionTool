@@ -106,14 +106,15 @@ This manual approach is tedious, error-prone, and becomes increasingly complex a
 - Manage bounding box calculations across multiple selected bodies
 
 **User Interface**
-- Custom dialog using Fusion 360's native UI controls matching the Circular Pattern tool layout
-- Standard axis selector control (filtered to X/Y/Z axes only)
-- Body selection with visual count indicators
-- Distribution dropdown for Count/Distance spacing methods
-- Dynamic OK button enabling based on parameter validation
-- Progress indicators for batch operations
-- **Contextual help tooltips** using Fusion 360's built-in tooltip API for all UI controls
-- **UI Mockup**: [Interactive UI Mockup](sandbox:/fusion360_ui_mockup) demonstrating the complete dialog layout and interactions
+- Custom dialog using Fusion 360's native Python API controls (not HTML-based)
+- Selection inputs for bodies and construction axes with built-in filtering
+- Dropdown command input for Count/Distance distribution methods
+- Boolean input for suppression option
+- Integer/Float spinner inputs for quantity values with automatic unit switching
+- Dynamic input validation and OK button state management
+- Progress indicators for batch operations using native API progress dialogs
+- **Implementation**: Native API controls (SelectionCommandInput, DropDownCommandInput, etc.) as demonstrated in the current codebase
+- **UI Reference**: HTML mockup in `DesignDocs/fusion360_ui_mockup.html` shows visual design translated to native API controls
 
 **Data Management**
 - Component creation and hierarchy management
