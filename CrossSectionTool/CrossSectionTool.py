@@ -81,7 +81,7 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
             
             message = f"Cross-Section Generation Parameters:\n\n"
             message += f"Bodies: {len(selectedBodies)} selected\n"
-            message += f"Axis: {selectedAxis.entityType if selectedAxis else 'None'}\n" 
+            message += f"Axis: {selectedAxis.entityToken if selectedAxis else 'None'}\n" 
             message += f"Distribution: {distributionMethod}\n"
             message += f"Suppression: {suppressionEnabled}\n"
             message += f"Quantity: {quantity}\n\n"
