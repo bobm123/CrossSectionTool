@@ -72,22 +72,86 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
             suppressionInput = inputs.itemById('suppression')
             quantityInput = inputs.itemById('quantity')
             
-            # For now, show collected parameters
+            # Get input values
             selectedBodies = [bodiesInput.selection(i).entity for i in range(bodiesInput.selectionCount)]
             selectedAxis = axisInput.selection(0).entity if axisInput.selectionCount > 0 else None
             distributionMethod = distributionInput.selectedItem.name
             suppressionEnabled = suppressionInput.value
-            quantity = quantityInput.value
+            quantity = int(quantityInput.value) if distributionMethod == 'Count' else quantityInput.value
             
+            # Display collected parameters
             message = f"Cross-Section Generation Parameters:\n\n"
             message += f"Bodies: {len(selectedBodies)} selected\n"
             message += f"Axis: {selectedAxis.entityToken if selectedAxis else 'None'}\n" 
             message += f"Distribution: {distributionMethod}\n"
             message += f"Suppression: {suppressionEnabled}\n"
             message += f"Quantity: {quantity}\n\n"
-            message += "Cross-section generation would be implemented here."
             
             _ui.messageBox(message)
+            
+            if not selectedBodies or not selectedAxis:
+                return
+            
+            # Get the active design and root component
+            app = adsk.core.Application.get()
+            design = adsk.fusion.Design.cast(app.activeProduct)
+            if not design:
+                _ui.messageBox("No active Fusion design")
+                return
+                
+            rootComp = design.rootComponent
+            
+            # Create a new component for the cross-sections
+            newCompOcc = rootComp.occurrences.addNewComponent(adsk.core.Matrix3D.create())
+            newCompOcc.component.name = "Cross-Sections"
+            newComp = newCompOcc.component
+            
+            # Calculate bounds along the selected axis
+            # For simplicity, we'll use a default range - in full implementation,
+            # this would analyze the selected bodies' bounds along the axis
+            axisLine = selectedAxis.geometry
+            axisVector = axisLine.direction
+            axisOrigin = axisLine.origin
+            
+            # Create evenly distributed offset planes
+            if distributionMethod == 'Count':
+                planeCount = quantity
+                # Default distribution range (this should be calculated from body bounds)
+                startOffset = -10.0  # cm
+                endOffset = 10.0     # cm
+                
+                if planeCount == 1:
+                    offsets = [0.0]
+                else:
+                    offsetRange = endOffset - startOffset
+                    offsets = [startOffset + (i * offsetRange / (planeCount - 1)) for i in range(planeCount)]
+            else:
+                # Distance-based distribution would be implemented here
+                planeCount = 6  # Default for now
+                offsets = [-10.0 + i * 3.33 for i in range(planeCount)]
+            
+            # Create construction planes
+            planesFeatures = newComp.features.constructionPlanes
+            createdPlanes = []
+            
+            for i, offset in enumerate(offsets):
+                # Create offset plane input
+                planeInput = planesFeatures.createInput()
+                
+                # Create offset plane along the selected axis
+                offsetValue = adsk.core.ValueInput.createByReal(offset)
+                planeInput.setByOffset(selectedAxis, offsetValue)
+                
+                # Create the plane
+                planeFeature = planesFeatures.add(planeInput)
+                planeFeature.name = f"Section_Plane_{i+1:03d}"
+                
+                createdPlanes.append(planeFeature)
+                
+                if suppressionEnabled:
+                    planeFeature.isSuppressed = True
+            
+            _ui.messageBox(f'Successfully created {len(createdPlanes)} construction planes in component "{newComp.name}"')
             
         except:
             _ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
