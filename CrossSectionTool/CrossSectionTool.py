@@ -101,17 +101,13 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                 
             rootComp = design.rootComponent
             
-            # Create a new component for the cross-sections
-            newCompOcc = rootComp.occurrences.addNewComponent(adsk.core.Matrix3D.create())
-            newCompOcc.component.name = "Cross-Sections"
-            newComp = newCompOcc.component
-            
             # Calculate bounds along the selected axis
             # For simplicity, we'll use a default range - in full implementation,
             # this would analyze the selected bodies' bounds along the axis
             axisLine = selectedAxis.geometry
-            axisVector = axisLine.direction
-            axisOrigin = axisLine.origin
+            axisVector = axisLine.startPoint.vectorTo(axisLine.endPoint)
+            axisVector.normalize()
+            axisOrigin = axisLine.startPoint
             
             # Create evenly distributed offset planes
             if distributionMethod == 'Count':
@@ -130,28 +126,57 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                 planeCount = 6  # Default for now
                 offsets = [-10.0 + i * 3.33 for i in range(planeCount)]
             
-            # Create construction planes
-            planesFeatures = newComp.features.constructionPlanes
+            # Create construction planes in root component for now
+            constructionPlanes = rootComp.constructionPlanes
             createdPlanes = []
             
+            # Try creating planes using setByDistanceOnPath with normalized distances (0-1)
             for i, offset in enumerate(offsets):
-                # Create offset plane input
-                planeInput = planesFeatures.createInput()
-                
-                # Create offset plane along the selected axis
-                offsetValue = adsk.core.ValueInput.createByReal(offset)
-                planeInput.setByOffset(selectedAxis, offsetValue)
-                
-                # Create the plane
-                planeFeature = planesFeatures.add(planeInput)
-                planeFeature.name = f"Section_Plane_{i+1:03d}"
-                
-                createdPlanes.append(planeFeature)
-                
-                if suppressionEnabled:
-                    planeFeature.isSuppressed = True
+                try:
+                    # Create offset plane input
+                    planeInput = constructionPlanes.createInput()
+                    
+                    # Calculate normalized distance (0-1) along the path
+                    # Map our offset range to 0-1 range
+                    normalizedDistance = (offset - offsets[0]) / (offsets[-1] - offsets[0]) if len(offsets) > 1 else 0.5
+                    # Clamp to 0-1 range
+                    normalizedDistance = max(0.0, min(1.0, normalizedDistance))
+                    
+                    distanceValue = adsk.core.ValueInput.createByReal(normalizedDistance)
+                    planeInput.setByDistanceOnPath(selectedAxis, distanceValue)
+                    
+                    # Create the plane
+                    planeFeature = constructionPlanes.add(planeInput)
+                    planeFeature.name = f"Section_Plane_{i+1:03d}"
+                    
+                    createdPlanes.append(planeFeature)
+                    
+                    if suppressionEnabled:
+                        planeFeature.isSuppressed = True
+                        
+                except Exception as e:
+                    _ui.messageBox(f"Failed to create plane {i+1} with distanceOnPath method: {str(e)}")
+                    # Fall back to XY plane offset
+                    try:
+                        planeInput = constructionPlanes.createInput()
+                        
+                        # Use XY plane as reference with Z offset
+                        xyPlane = rootComp.xYConstructionPlane
+                        offsetValue = adsk.core.ValueInput.createByReal(offset)
+                        planeInput.setByOffset(xyPlane, offsetValue)
+                        
+                        planeFeature = constructionPlanes.add(planeInput)
+                        planeFeature.name = f"Section_Plane_{i+1:03d}"
+                        createdPlanes.append(planeFeature)
+                        
+                        if suppressionEnabled:
+                            planeFeature.isSuppressed = True
+                            
+                    except Exception as e2:
+                        _ui.messageBox(f"Failed both distanceOnPath and XY offset methods for plane {i+1}: {str(e2)}")
+                        break
             
-            _ui.messageBox(f'Successfully created {len(createdPlanes)} construction planes in component "{newComp.name}"')
+            _ui.messageBox(f'Successfully created {len(createdPlanes)} construction planes in root component')
             
         except:
             _ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
