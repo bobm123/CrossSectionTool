@@ -10,6 +10,7 @@ import adsk.fusion
 _app = None
 _ui = None
 _handlers = []
+_DEBUG = False
 
 # Event handler for input changes
 class CrossSectionInputChangedHandler(adsk.core.InputChangedEventHandler):
@@ -87,7 +88,8 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
             message += f"Suppression: {suppressionEnabled}\n"
             message += f"Quantity: {quantity}\n\n"
             
-            _ui.messageBox(message)
+            if _DEBUG:
+                _ui.messageBox(message)
             
             if not selectedBodies or not selectedAxis:
                 return
@@ -96,7 +98,8 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
             app = adsk.core.Application.get()
             design = adsk.fusion.Design.cast(app.activeProduct)
             if not design:
-                _ui.messageBox("No active Fusion design")
+                if _DEBUG:
+                    _ui.messageBox("No active Fusion design")
                 return
                 
             rootComp = design.rootComponent
@@ -176,7 +179,8 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                         _ui.messageBox(f"Failed both distanceOnPath and XY offset methods for plane {i+1}: {str(e2)}")
                         break
             
-            _ui.messageBox(f'Successfully created {len(createdPlanes)} construction planes in root component')
+            if _DEBUG:
+                _ui.messageBox(f'Successfully created {len(createdPlanes)} construction planes in root component')
             
         except:
             _ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
