@@ -19,9 +19,17 @@ A Fusion 360 script that automatically generates a series of cross-sectional con
    - Clone this repository or download the ZIP file
    - Extract to your desired location
 
-2. **Copy to Fusion 360 Scripts directory**:
+2. **Install using one of these methods**:
+
+   **Method A: Copy to Scripts directory**
    - **Windows**: `%APPDATA%\Autodesk\Autodesk Fusion 360\API\Scripts\`
    - **Mac**: `~/Library/Application Support/Autodesk/Autodesk Fusion 360/API/Scripts/`
+
+   **Method B: Add via Fusion 360 interface**
+   - In Fusion 360, go to **Scripts and Add-ins** > **Scripts**
+   - Click the green **+** button next to "My Scripts"
+   - Navigate to and select the `CrossSectionTool` directory
+   - The script will be added to your My Scripts list
 
 3. **File structure after installation**:
    ```
