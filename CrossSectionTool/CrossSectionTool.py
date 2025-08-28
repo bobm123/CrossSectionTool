@@ -162,6 +162,19 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                     sketch = sketches.add(planeFeature)
                     sketch.name = f"Section_Sketch_{i+1:03d}"
                     
+                    # Add intersect curves for each selected body
+                    for bodyIndex, body in enumerate(selectedBodies):
+                        try:
+                            # Create intersect input
+                            intersectInput = sketch.intersectWithSketchPlane([body])
+                            sketch.intersectWithSketchPlane([body])
+                        except:
+                            # Skip body if intersection fails
+                            pass
+                    
+                    # Finish the sketch (exit sketch mode)
+                    sketch.isComputeDeferred = False
+                    
                     createdPlanes.append(planeFeature)
                     
                     if suppressionEnabled:
@@ -186,6 +199,19 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                         sketches = newComp.sketches
                         sketch = sketches.add(planeFeature)
                         sketch.name = f"Section_Sketch_{i+1:03d}"
+                        
+                        # Add intersect curves for each selected body
+                        for bodyIndex, body in enumerate(selectedBodies):
+                            try:
+                                # Create intersect input
+                                intersectInput = sketch.intersectWithSketchPlane([body])
+                                sketch.intersectWithSketchPlane([body])
+                            except:
+                                # Skip body if intersection fails
+                                pass
+                        
+                        # Finish the sketch (exit sketch mode)
+                        sketch.isComputeDeferred = False
                         
                         createdPlanes.append(planeFeature)
                         
