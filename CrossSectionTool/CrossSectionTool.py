@@ -104,6 +104,11 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                 
             rootComp = design.rootComponent
             
+            # Create a new component for the cross-sections
+            newCompOcc = rootComp.occurrences.addNewComponent(adsk.core.Matrix3D.create())
+            newCompOcc.component.name = "Cross-Sections"
+            newComp = newCompOcc.component
+            
             # Calculate bounds along the selected axis
             # For simplicity, we'll use a default range - in full implementation,
             # this would analyze the selected bodies' bounds along the axis
@@ -129,8 +134,8 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                 planeCount = 6  # Default for now
                 offsets = [-10.0 + i * 3.33 for i in range(planeCount)]
             
-            # Create construction planes in root component for now
-            constructionPlanes = rootComp.constructionPlanes
+            # Create construction planes in the new component
+            constructionPlanes = newComp.constructionPlanes
             createdPlanes = []
             
             # Try creating planes using setByDistanceOnPath with normalized distances (0-1)
@@ -152,10 +157,16 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                     planeFeature = constructionPlanes.add(planeInput)
                     planeFeature.name = f"Section_Plane_{i+1:03d}"
                     
+                    # Create a new sketch on this plane
+                    sketches = newComp.sketches
+                    sketch = sketches.add(planeFeature)
+                    sketch.name = f"Section_Sketch_{i+1:03d}"
+                    
                     createdPlanes.append(planeFeature)
                     
                     if suppressionEnabled:
                         planeFeature.isSuppressed = True
+                        sketch.isSuppressed = True
                         
                 except Exception as e:
                     _ui.messageBox(f"Failed to create plane {i+1} with distanceOnPath method: {str(e)}")
@@ -170,17 +181,24 @@ class CrossSectionExecuteHandler(adsk.core.CommandEventHandler):
                         
                         planeFeature = constructionPlanes.add(planeInput)
                         planeFeature.name = f"Section_Plane_{i+1:03d}"
+                        
+                        # Create a new sketch on this fallback plane
+                        sketches = newComp.sketches
+                        sketch = sketches.add(planeFeature)
+                        sketch.name = f"Section_Sketch_{i+1:03d}"
+                        
                         createdPlanes.append(planeFeature)
                         
                         if suppressionEnabled:
                             planeFeature.isSuppressed = True
+                            sketch.isSuppressed = True
                             
                     except Exception as e2:
                         _ui.messageBox(f"Failed both distanceOnPath and XY offset methods for plane {i+1}: {str(e2)}")
                         break
             
             if _DEBUG:
-                _ui.messageBox(f'Successfully created {len(createdPlanes)} construction planes in root component')
+                _ui.messageBox(f'Successfully created {len(createdPlanes)} construction planes in component "{newComp.name}"')
             
         except:
             _ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
